@@ -12,7 +12,7 @@
 /* jshint ignore:start */
 
 (function() {
-    'use strict';
+    //'use strict';
     console.log("Initializing Heimdall (XHR)");
 
     function handleResponse(response) {
