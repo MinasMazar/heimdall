@@ -20,8 +20,12 @@ defmodule Heimdall.Application do
   end
 
   defp cowboy_spec do
-    Plug.Cowboy.child_spec(scheme: :http, plug: Heimdall.Router, options: [port: port()])
+    Plug.Cowboy.child_spec(
+      scheme: :http,
+      plug: Heimdall.Router,
+      options: [port: port(), dispatch: dispatch()])
   end
 
+  defp dispatch, do: PlugSocket.plug_cowboy_dispatch(Heimdall.Router)
   defp port, do: Application.get_env(:heimdall, :port, 9069)
 end
