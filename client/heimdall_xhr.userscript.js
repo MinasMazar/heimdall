@@ -61,7 +61,7 @@ class HeimdallJS {
       method: "POST",
       url: "http://localhost:9069/heimdall",
       headers: { "Content-type" : "application/json" },
-      data: JSON.stringify(message),
+      data: this.prepareMessage(message),
       onerror:    function (e) { console.error ('**** error ', e); },
       onabort:    function (e) { console.error ('**** abort ', e); },
       ontimeout:  function (e) { console.error ('**** timeout ', e); },
@@ -73,8 +73,11 @@ class HeimdallJS {
   }
 
   heimdallSendWS(message) {
-    const payload = { "url": window.location.href, payload: message };
-    this.socket.send(JSON.stringify(payload));
+    this.socket.send(this.prepareMessage(message));
+  }
+
+  prepareMessage(message) {
+    return JSON.stringify({ "location": window.location, "message": message });
   }
 
   setupSocket() {
@@ -87,11 +90,11 @@ class HeimdallJS {
   }
 }
 
-const heimdall = new HeimdallJS();
-window.addEventListener("click", (event) => { heimdall.dispatchEvent(event) });
-window.addEventListener("change", (event) => { heimdall.dispatchEvent(event) });
-window.addEventListener("input", (event) => { heimdall.dispatchEvent(event) });
+const Heimdall = new HeimdallJS();
+window.addEventListener("click", (event) => { Heimdall.dispatchEvent(event) });
+window.addEventListener("change", (event) => { Heimdall.dispatchEvent(event) });
+window.addEventListener("input", (event) => { Heimdall.dispatchEvent(event) });
 
 setTimeout(function() {
-  heimdall.heimdallSend({ "location": window.location, "message": "setup" });
+  Heimdall.heimdallSend("setup");
 }, 2000);

@@ -43,8 +43,8 @@ defmodule Heimdall.SocketHandler do
   defp dispatch_message({_host, ref, message}) do
     Registry.dispatch(Heimdall.Registry, :message, fn entries ->
       for {pid, regex} <- entries do
-        Logger.debug("Dispatching message #{inspect message}")
         if Regex.run(regex, ref) do
+          Logger.debug("Dispatching message #{inspect message}")
           send(pid, {:message, message})
         end
       end
