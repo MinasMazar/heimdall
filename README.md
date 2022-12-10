@@ -15,6 +15,24 @@ def deps do
 end
 ```
 
+## Usage
+
+Start a process and register it via
+
+```elixir
+Registry.register(Heimdall.Registry, Heimdall, url_regex)
+```
+
+or via
+
+```elixir
+Heimdall.subscribe_handler(url_regex)
+```
+
+Url regex will match against every event or message sent by the client.
+
+## Doc
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/heimdall>.

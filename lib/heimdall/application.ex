@@ -9,8 +9,8 @@ defmodule Heimdall.Application do
   def start(_type, _args) do
     children = [
       # Starts a worker by calling: Heimdall.Worker.start_link(arg)
-      cowboy_spec()
-      # {Riverside, [handler: Heimdall.SocketHandler]}
+      cowboy_spec(),
+      registry()
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -24,6 +24,13 @@ defmodule Heimdall.Application do
       scheme: :http,
       plug: Heimdall.Router,
       options: [port: port(), dispatch: dispatch()])
+  end
+
+  defp registry do
+    Registry.child_spec(
+      keys: :duplicate,
+      name: Heimdall.Registry
+    )
   end
 
   defp dispatch, do: PlugSocket.plug_cowboy_dispatch(Heimdall.Router)

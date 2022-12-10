@@ -14,7 +14,6 @@ defmodule Heimdall.Router do
   plug :dispatch
 
   post "/heimdall" do
-    Logger.debug("(#{__MODULE__}) Received message: #{inspect conn.params}")
     with response <- handle_message(conn.params) do
       send_resp(conn, 200, response)
     end

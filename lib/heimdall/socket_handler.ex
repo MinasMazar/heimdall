@@ -1,5 +1,6 @@
 defmodule Heimdall.SocketHandler do
   @behaviour :cowboy_websocket
+  @register_name Heimdall.Registry
   require Logger
 
   import Heimdall
@@ -9,7 +10,8 @@ defmodule Heimdall.SocketHandler do
   end
 
   def websocket_init(state) do
-    #Registry.register(Heimdall.Registry, __MODULE__, {})
+    Logger.debug("Starting websocket handler")
+    Registry.register(Heimdall.Registry, :response, nil)
     {:ok, %{}}
   end
 
@@ -18,17 +20,34 @@ defmodule Heimdall.SocketHandler do
   end
 
   def websocket_handle({:json, json}, state) do
-    Logger.debug("(#{__MODULE__}) Received message: #{inspect json}")
-    with response <- handle_message(json) do
-      {:reply, {:text, response}, state}
+    Logger.debug("Received message #{inspect json}")
+    with responses <- dispatch_message(json) do
+      {:reply, {:text, "null"}, state}
     end
   end
 
-  def websocket_info(info, state) do
-    {:reply, state}
+  def websocket_info({:response, response}, state) do
+    Logger.debug("Received response for the client #{inspect response}")
+    {:reply, {:text, response}, state}
   end
 
-  def terminate(_reason, _req, _state) do
+  def terminate(reason, _req, _state) do
+    Logger.debug("Terminating websocket handler because of #{inspect reason}")
     :ok
+  end
+
+  defp dispatch_message(message = %{ "location" => %{ "href" => ref, "host" => host}}) do
+    dispatch_message({host, ref, message})
+  end
+
+  defp dispatch_message({_host, ref, message}) do
+    Registry.dispatch(Heimdall.Registry, :message, fn entries ->
+      for {pid, regex} <- entries do
+        Logger.debug("Dispatching message #{inspect message}")
+        if Regex.run(regex, ref) do
+          send(pid, {:message, message})
+        end
+      end
+    end)
   end
 end
