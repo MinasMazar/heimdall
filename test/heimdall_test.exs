@@ -2,20 +2,20 @@ defmodule HeimdallTest do
   use ExUnit.Case
   doctest Heimdall
 
-  defmodule HeimdallTest.Consumer do
+  defmodule Consumer do
     use GenServer
     import Heimdall
 
     def start_link(), do: GenServer.start_link(__MODULE__, nil)
-    def handle_message(%{"message" => "setup"}), do: send_to_client("ok")
-    def handle_message(_), do: send_to_client("fallback")
+    def handle_message(%{"message" => "setup"}), do: "ok"
+    def handle_message(_), do: "fallback"
   end
 
   test "receives setup" do
     {:ok, consumer} = HeimdallTest.Consumer.start_link()
     {:ok, env} = Tesla.post(client(), "http://localhost:9069/heimdall", %{"message" => "setup"})
 
-    assert_received "ok"
+    assert_receive "ok", 1000
   end
 
   test "receives unknown message" do
