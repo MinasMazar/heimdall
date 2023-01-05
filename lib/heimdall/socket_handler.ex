@@ -45,7 +45,7 @@ defmodule Heimdall.SocketHandler do
       for {pid, regex} <- entries do
         if Regex.run(regex, ref) do
           Logger.debug("Dispatching message #{inspect message}")
-          send(pid, {:message, message})
+          send(pid, message)
         end
       end
     end)
