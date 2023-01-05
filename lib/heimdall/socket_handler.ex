@@ -36,7 +36,7 @@ defmodule Heimdall.SocketHandler do
     :ok
   end
 
-  defp dispatch_message(message = %{ "location" => %{ "href" => ref, "host" => host}}) do
+  defp dispatch_message(%{ "location" => %{ "href" => ref, "host" => host}, "message" => message}) do
     dispatch_message({host, ref, message})
   end
 
