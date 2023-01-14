@@ -16,6 +16,7 @@ class HeimdallJS {
 
   constructor() {
     console.log("Initializing Heimdall");
+    this.uuid = crypto.randomUUID();
     this.useWS = true;
 
     if (this.useWS) {
@@ -34,9 +35,8 @@ class HeimdallJS {
   }
 
   dispatchEvent(event) {
-    //console.log(event);
+    console.log(event);
     this.heimdallSend({
-      "location": window.location,
       "event": {
         "type": event.type,
         "tag": event.target.tagName,
@@ -77,7 +77,7 @@ class HeimdallJS {
   }
 
   prepareMessage(message) {
-    return JSON.stringify({ "location": window.location, "message": message });
+    return JSON.stringify({ "uuid": this.uuid, "location": window.location, "message": message });
   }
 
   setupSocket() {
@@ -91,10 +91,11 @@ class HeimdallJS {
 }
 
 const Heimdall = new HeimdallJS();
-window.addEventListener("click", (event) => { Heimdall.dispatchEvent(event) });
-window.addEventListener("change", (event) => { Heimdall.dispatchEvent(event) });
-window.addEventListener("input", (event) => { Heimdall.dispatchEvent(event) });
+document.addEventListener("click", (event) => { Heimdall.dispatchEvent(event) });
+document.addEventListener("change", (event) => { Heimdall.dispatchEvent(event) });
+document.addEventListener("input", (event) => { Heimdall.dispatchEvent(event) });
 
 setTimeout(function() {
   Heimdall.heimdallSend("setup");
-}, 2000);
+}, 100);
+
