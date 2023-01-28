@@ -1,4 +1,4 @@
 import Config
 
 config :heimdall, handler: HeimdallTest.Consumer
-config :logger, level: :error
+config :logger, level: :debug

@@ -4,32 +4,31 @@ defmodule HeimdallTest do
 
   defmodule Consumer do
     use GenServer
-    import Heimdall
 
     def start_link(), do: GenServer.start_link(__MODULE__, nil)
-    def handle_message(%{"message" => "setup"}), do: "ok"
-    def handle_message(_), do: "fallback"
+    def init(_), do: {:ok, Heimdall.subscribe_handler(~r[sitoweb])}
+    def handle_message({_host, _ref, "setup"}), do: {:ok, "ok"}
   end
 
   test "receives setup" do
-    {:ok, consumer} = HeimdallTest.Consumer.start_link()
-    {:ok, env} = Tesla.post(client(), "http://localhost:9069/heimdall", %{"message" => "setup"})
+    {:ok, response} = Tesla.post(client(), "http://localhost:9069/heimdall", %{"message" => "setup", "location" => %{"href" => "https://siteweb.com", "host" => "siteweb.com"}})
 
-    assert_receive "ok", 1000
+    assert response.status == 200
+    assert response.body == "ok"
   end
 
   test "receives unknown message" do
-    {:ok, consumer} = HeimdallTest.Consumer.start_link()
-    {:ok, env} = Tesla.post(client(), "http://localhost:9069/heimdall", ["something strange"])
+    {:ok, response} = Tesla.post(client(), "http://localhost:9069/heimdall", %{"message" => "something strange"})
 
-    refute_received "fallback"
+    assert response.status == 404
+    assert response.body == "unknown"
   end
 
   test "unmatched request" do
-    {:ok, consumer} = HeimdallTest.Consumer.start_link()
-    {:ok, env} = Tesla.get(client(), "http://localhost:9069/unknown")
+    {:ok, response} = Tesla.get(client(), "http://localhost:9069/unknown")
 
-    refute_received "ok"
+    assert response.status == 404
+    assert response.body == "not-found"
   end
 
   defp client do

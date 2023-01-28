@@ -14,13 +14,15 @@ defmodule Heimdall.Router do
   plug :dispatch
 
   post "/heimdall" do
-    with response <- handle_message(conn.params) do
-      send_resp(conn, 200, response)
+    Logger.debug("#{__MODULE__} received request on '/heimdall' with params #{inspect conn.params}; dispatching to HTTP message handler")
+    case handle_message(conn.params) do
+      {:ok, response} -> send_resp(conn, 200, response)
+      {:error, error} -> send_resp(conn, 404, error)
     end
   end
 
   match _ do
-    Logger.debug("Unmatched request")
-    send_resp(conn, 404, "")
+    Logger.debug("Not-found. '/heimdall' is the only endpoint here.")
+    send_resp(conn, 404, "not-found")
   end
 end

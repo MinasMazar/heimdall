@@ -35,19 +35,4 @@ defmodule Heimdall.SocketHandler do
     Logger.debug("Terminating websocket handler because of #{inspect reason}")
     :ok
   end
-
-  defp dispatch_message(%{"location" => %{ "href" => ref, "host" => host}, "message" => message}) do
-    dispatch_message({host, ref, message})
-  end
-
-  defp dispatch_message({_host, ref, message}) do
-    Registry.dispatch(Heimdall.Registry, :message, fn entries ->
-      for {pid, regex} <- entries do
-        if Regex.run(regex, ref) do
-          Logger.debug("Dispatching message #{inspect message}")
-          send(pid, message)
-        end
-      end
-    end)
-  end
 end
