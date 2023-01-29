@@ -11,15 +11,15 @@ defmodule Heimdall do
   end
 
   def dispatch_message(%{"location" => %{ "href" => ref, "host" => host}, "message" => message}) do
-    dispatch_message({host, ref, message})
+    dispatch_message({{host, ref}, message})
   end
 
-  def dispatch_message({_host, ref, message}) do
+  def dispatch_message({{host, ref}, message}) do
     Registry.dispatch(Heimdall.Registry, :message, fn entries ->
       for {pid, regex} <- entries do
         if Regex.run(regex, ref) do
           Logger.debug("Dispatching message #{inspect message}")
-          send(pid, message)
+          send(pid, {{host, ref}, message})
         end
       end
     end)
@@ -37,7 +37,7 @@ defmodule Heimdall do
   def handle_message(%{"location" => %{ "href" => ref, "host" => host}, "message" => 
 message}) do
     Logger.debug("Handling message (v.2) -> {#{host}, #{ref}}: #{inspect message}")
-    handler().handle_message({host, ref, message})
+    handler().handle_message({{host, ref}, message})
   end
 
   def handle_message(message) when is_map(message) do
@@ -53,8 +53,8 @@ message}) do
     end
   end
 
-  def handle_message({host, ref, message}) when is_binary(message) do
-    handler().handle_message({host, ref, message})
+  def handle_message({{host, ref}, message}) when is_binary(message) do
+    handler().handle_message({{host, ref}, message})
   end
 
   defp handler do
