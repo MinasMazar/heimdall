@@ -17,12 +17,12 @@ defmodule Heimdall.DefaultHandler do
     {:noreply, state}
   end
 
-  def handle_message(message) do
-    "console.log(\"pong\");"
-  end
-
   def handle_info(:pong, state) do
     Heimdall.send_response("console.log(\"poooong\");")
     {:noreply, state}
+  end
+
+  def handle_message(_) do
+    "console.log(\"pong\");"
   end
 end

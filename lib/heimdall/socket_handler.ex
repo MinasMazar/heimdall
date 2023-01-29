@@ -1,8 +1,6 @@
 defmodule Heimdall.SocketHandler do
   @behaviour :cowboy_websocket
-  @register_name Heimdall.Registry
   require Logger
-
   import Heimdall
 
   def init(req, state) do
@@ -12,7 +10,7 @@ defmodule Heimdall.SocketHandler do
   def websocket_init(state) do
     Logger.debug("Starting websocket handler")
     Registry.register(Heimdall.Registry, :response, nil)
-    {:ok, %{}}
+    {:ok, state}
   end
 
   def websocket_handle({:text, message}, state) do
@@ -21,9 +19,8 @@ defmodule Heimdall.SocketHandler do
 
   def websocket_handle({:json, json}, state) do
     Logger.debug("Received message #{inspect json}")
-    with responses <- dispatch_message(json) do
-      {:reply, {:text, "null"}, state}
-    end
+    dispatch_message(json)
+    {:reply, {:text, "null"}, state}
   end
 
   def websocket_info({:response, response}, state) do

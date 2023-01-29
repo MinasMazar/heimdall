@@ -7,7 +7,7 @@ defmodule HeimdallTest do
 
     def start_link(), do: GenServer.start_link(__MODULE__, nil)
     def init(_), do: {:ok, Heimdall.subscribe_handler(~r[sitoweb])}
-    def handle_message({caller, "setup"}), do: {:ok, "ok"}
+    def handle_message({_caller, "setup"}), do: {:ok, "ok"}
   end
 
   test "receives setup" do
