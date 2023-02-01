@@ -10,7 +10,8 @@ defmodule Heimdall.Application do
     children = [
       # Starts a worker by calling: Heimdall.Worker.start_link(arg)
       cowboy_spec(),
-      registry()
+      registry(),
+      default_handler(),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -24,6 +25,10 @@ defmodule Heimdall.Application do
       scheme: :http,
       plug: Heimdall.Router,
       options: [port: port(), dispatch: dispatch()])
+  end
+
+  defp default_handler do
+    Heimdall.DefaultHandler
   end
 
   defp registry do
