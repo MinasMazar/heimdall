@@ -13,16 +13,25 @@ defmodule Heimdall.DefaultHandler do
 
   def handle_info({_caller, "setup"}, state) do
     Logger.debug("Received setup!")
-    Process.send_after(self(), :pong, 1400)
-    {:noreply, state}
-  end
-
-  def handle_info({_caller, _}, state) do
     handle_info(:pong, state)
   end
 
+  def handle_info({_caller, "ping"}, state) do
+    handle_info(:pong, state)
+  end
+
+  def handle_info({_caller, _}, state) do
+    {:noreply, state}
+  end
+
+  @pong """
+  console.log("pong");
+  setTimeout(function() {
+    Heimdall.heimdallSend("ping");
+  }, 4400);
+  """
   def handle_info(:pong, state) do
-    Heimdall.send_response("console.log(\"pong\");")
+    Heimdall.send_response(@pong)
     {:noreply, state}
   end
 

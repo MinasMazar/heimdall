@@ -33,7 +33,7 @@ defmodule Heimdall.Application do
 
   defp registry do
     Registry.child_spec(
-      keys: :duplicate,
+      keys: :unique,
       name: Heimdall.Registry
     )
   end
