@@ -8,8 +8,6 @@ defmodule Heimdall.SocketHandler do
   end
 
   def websocket_init(state) do
-    Logger.debug("Starting websocket handler")
-    Registry.register(Heimdall.Registry, :response, nil)
     {:ok, state}
   end
 
@@ -30,6 +28,6 @@ defmodule Heimdall.SocketHandler do
 
   def terminate(reason, _req, _state) do
     Logger.debug("Terminating websocket handler because of #{inspect reason}")
-    :ok
+    Registry.unregister(Heimdall.Registry, :response)
   end
 end

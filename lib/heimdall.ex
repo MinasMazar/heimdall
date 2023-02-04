@@ -2,23 +2,18 @@ defmodule Heimdall do
   @moduledoc """
   Documentation for `Heimdall`.
   """
-
   require Logger
 
-  @register_name Heimdall.Registry
   def subscribe_handler(url_regex) do
-    Registry.register(@register_name, :message, url_regex)
+    Registry.register(Heimdall.Registry, :message, url_regex)
   end
 
   def dispatch_message(%{"location" => %{ "href" => ref, "host" => host}, "message" => message}) do
-    dispatch_message({{host, ref}, message})
-  end
-
-  def dispatch_message({{host, ref}, message}) do
     Registry.dispatch(Heimdall.Registry, :message, fn entries ->
       for {pid, regex} <- entries do
         if Regex.run(regex, ref) do
           Logger.debug("Dispatching message #{inspect message}")
+          Registry.register(Heimdall.Registry, :response, pid)
           send(pid, {{host, ref}, message})
         end
       end
@@ -27,9 +22,11 @@ defmodule Heimdall do
 
   def send_response(message) do
     Registry.dispatch(Heimdall.Registry, :response, fn entries ->
-      for {pid, _} <- entries do
-        Logger.debug("Sending response to socket")
-        send(pid, {:response, message})
+      for {pid, handler} <- entries do
+        if handler == self() do
+          Logger.debug("Sending response to socket")
+          send(pid, {:response, message})
+        end
       end
     end)
   end
